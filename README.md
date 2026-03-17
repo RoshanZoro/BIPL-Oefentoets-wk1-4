@@ -17,6 +17,7 @@ Een desktop-oefenprogramma voor de theorie van het **BIPL**-vak (Netwerken & Pla
 - **Directe feedback** — juist antwoord groen, fout antwoord rood met het correcte antwoord zichtbaar
 - **Scoreoverzicht** aan het einde met alle fout beantwoorde vragen en de correcte antwoorden
 - Meteen **opnieuw spelen** of terug naar het hoofdmenu
+- **Dynamisch menu** — voeg een nieuw JSON-bestand toe aan de `questions/`-map en er verschijnt automatisch een nieuwe knop
 
 ---
 
@@ -60,42 +61,53 @@ python3 bipl_quiz.py
 
 ---
 
-## Hoe de vragen werken
-
-Elke vraag staat als een tuple in de lijst `ALL_QUESTIONS` bovenaan het bestand:
-
-```python
-("Vraagtekst",
- ["Optie A", "Optie B", "Optie C", "Optie D"],
- 2,                       # index van het juiste antwoord (0 = eerste optie)
- "Netwerken – Week 1")    # onderwerplabel
-```
-
-De correcte index verwijst naar de **originele, ongeschudde optielijst**. Bij het starten wordt de volgorde willekeurig geschud en bepaalt de code daarna welke geschudde positie het opgeslagen antwoord heeft gekregen.
-
----
-
-## Vragen toevoegen
-
-Open `bipl_quiz.py` en voeg een nieuwe tuple toe aan `ALL_QUESTIONS`:
-
-```python
-("Welk commando toont de routing-tabel op Cisco IOS?",
- ["show interfaces", "show ip route", "show arp", "show version"],
- 1,
- "Netwerken – Week 1"),
-```
-
-Regels:
-- De correcte index moet verwijzen naar het juiste antwoord in **jouw optielijst** (0 = eerste optie)
-- Gebruik een bestaand onderwerplabel zodat de groepering klopt
-- Herstart het programma — wijzigingen zijn direct van kracht
-
----
-
 ## Projectstructuur
 
 ```
-bipl_quiz.py   # Alles in één bestand: vragenbank + GUI, geen externe afhankelijkheden
+bipl_quiz.py
+questions/
+    Netwerken-en-Platformen-Week-1-2-3-4.json
 README.md
 ```
+
+De vragen staan **niet** meer in `bipl_quiz.py` zelf, maar in afzonderlijke JSON-bestanden in de `questions/`-map. Het programma scant deze map automatisch bij het opstarten en maakt voor elk bestand een knop in het hoofdmenu.
+
+---
+
+## Vragensets toevoegen of uitbreiden
+
+### Nieuw JSON-bestand toevoegen
+
+Maak een nieuw `.json`-bestand aan in de `questions/`-map. De bestandsnaam bepaalt automatisch de tekst op de knop:
+
+| Bestandsnaam | Knoptekst |
+|---|---|
+| `Netwerken-en-Platformen-Week-1-2-3-4.json` | Netwerken en Platformen Week 1 t/m 4 |
+| `Netwerken-en-Platformen-Week-4-7.json` | Netwerken en Platformen Week 4 t/m 7 |
+| `Linux-Basics.json` | Linux Basics |
+
+Herstart het programma — de nieuwe knop verschijnt vanzelf.
+
+### JSON-formaat
+
+Elk JSON-bestand is een lijst van vraagobjecten:
+
+```json
+[
+  {
+    "question": "Welk commando toont de routing-tabel op Cisco IOS?",
+    "options": ["show interfaces", "show ip route", "show arp", "show version"],
+    "correct": 1,
+    "topic": "Netwerken – Week 1"
+  }
+]
+```
+
+| Veld | Type | Beschrijving |
+|---|---|---|
+| `question` | string | De vraagtekst |
+| `options` | lijst van 4 strings | De antwoordopties |
+| `correct` | getal (0–3) | Index van het juiste antwoord (0 = eerste optie) |
+| `topic` | string | Onderwerplabel dat in de quiz wordt getoond |
+
+> **Let op:** `correct` verwijst naar de **originele, ongeschudde** volgorde in `options`. De app schudt de opties automatisch bij elke vraag.
